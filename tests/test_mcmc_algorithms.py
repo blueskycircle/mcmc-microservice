@@ -1,6 +1,6 @@
 import numpy as np
-from lib.mcmc_utils import target_distribution, proposal_distribution
-from lib.mcmc_algorithms import metropolis_hastings
+from library.mcmc_utils import target_distribution, proposal_distribution
+from library.mcmc_algorithms import metropolis_hastings
 
 
 def test_metropolis_hastings():
