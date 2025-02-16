@@ -15,3 +15,4 @@
 5. Add MCMC diagnostics.
 6. Turn into a CLI tool.
 7. Containerize the tool with Docker.
+8. Fix lint for GitHub Actions.

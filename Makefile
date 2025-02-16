@@ -9,6 +9,6 @@ format:
 	black lib/*.py tests/*.py *.py
 
 lint:
-	pylint --disable=R,C lib/mcmc_algorithms.py lib/mcmc_utils.py
+	pylint --disable=R,C *.py
 
 all: install lint test
