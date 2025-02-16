@@ -1,5 +1,7 @@
 # mcmc-microservice
 
+[![Python application test with Github Actions](https://github.com/blueskycircle/mcmc-microservice/actions/workflows/main.yml/badge.svg)](https://github.com/blueskycircle/mcmc-microservice/actions/workflows/main.yml)
+
 ## Things to do
 
 1. Add more MCMC methods.
