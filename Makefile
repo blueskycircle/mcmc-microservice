@@ -6,7 +6,7 @@ test:
 	python -m pytest -vv tests/test_*.py
 
 format:
-	black lib/*.py tests/*.py *.py
+	black library/*.py tests/*.py *.py
 
 lint:
 	pylint --disable=R,C library/*.py
