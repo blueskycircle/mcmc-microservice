@@ -2,6 +2,10 @@
 
 [![Python application test with Github Actions](https://github.com/blueskycircle/mcmc-microservice/actions/workflows/main.yml/badge.svg)](https://github.com/blueskycircle/mcmc-microservice/actions/workflows/main.yml)
 
+## Metropolis-Hastings example
+
+![image](https://github.com/user-attachments/assets/a44d6601-537f-427c-add8-46a6a48e91c4)
+
 ## Things to do
 
 1. Add more MCMC methods.
