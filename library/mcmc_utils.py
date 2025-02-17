@@ -19,6 +19,6 @@ def target_distribution(expression=None):
     return distribution
 
 
-def proposal_distribution(x):
+def proposal_distribution(x, variance=1.0):
     # Example proposal distribution: normal distribution centered at x
-    return np.random.normal(x, 1.0)
+    return np.random.normal(x, np.sqrt(variance))
