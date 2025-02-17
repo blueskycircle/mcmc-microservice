@@ -7,8 +7,11 @@ def test_metropolis_hastings():
     initial_value = 0.0
     num_iterations = 1000
 
+    # Use the default target distribution (standard normal distribution)
+    target_dist = target_distribution()
+
     samples, elapsed_time, acceptance_rate = metropolis_hastings(
-        target_distribution, proposal_distribution, initial_value, num_iterations
+        target_dist, proposal_distribution, initial_value, num_iterations
     )
 
     # Check that the returned samples array has the correct length
