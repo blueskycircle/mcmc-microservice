@@ -221,14 +221,6 @@ curl -X 'POST' \
   }'
 ```
 
-## Metropolis-Hastings Example
-
-![image](https://github.com/user-attachments/assets/a44d6601-537f-427c-add8-46a6a48e91c4)
-
-## Adaptive Metropolis-Hastings Example
-
-![image](https://github.com/user-attachments/assets/b27eb69c-b137-40f6-a177-f9f4eb01d64e)
-
 ## Things To Do
 
 1. Add more MCMC methods.
