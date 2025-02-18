@@ -21,11 +21,14 @@
 ### Run adaptive Metropolis-Hastings with custom parameters
 `python cli.py amh -e "exp(-0.5 * (x - 2)**2) / sqrt(2 * pi)" -n 20000 --initial-variance 2.0`
 
-###  Save samples without plotting
+### Save samples without plotting
 `python cli.py mh --no-plot --save -o "mh_samples.txt"`
 
 ### Run with a specific seed for reproducibility
 `python cli.py mh --iterations 1000 --seed 42`
+
+### Run adaptive Metropolis-Hastings for a Gumbel distribution
+`python cli.py amh -e "(1/3) * exp(-((x - 2)/3) - exp(-((x - 2)/3)))" --initial 0 --iterations 50000 --initial-variance 1 --increase-factor 1.1 --decrease-factor 0.9 --burn-in 10000 --thin 1 --seed 42 --plot --save --output gumbel_samples.txt`
 
 ## Things To Do
 
