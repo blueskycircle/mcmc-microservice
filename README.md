@@ -2,14 +2,6 @@
 
 [![Python application test with Github Actions](https://github.com/blueskycircle/mcmc-microservice/actions/workflows/main.yml/badge.svg)](https://github.com/blueskycircle/mcmc-microservice/actions/workflows/main.yml)
 
-## Metropolis-Hastings Example
-
-![image](https://github.com/user-attachments/assets/a44d6601-537f-427c-add8-46a6a48e91c4)
-
-## Adaptive Metropolis-Hastings Example
-
-![image](https://github.com/user-attachments/assets/b27eb69c-b137-40f6-a177-f9f4eb01d64e)
-
 ## Command Line Interface (CLI)
 
 https://github.com/user-attachments/assets/6dc543e9-7ade-4728-a7ce-668886a39597
@@ -31,6 +23,14 @@ https://github.com/user-attachments/assets/6dc543e9-7ade-4728-a7ce-668886a39597
 
 ### Run adaptive Metropolis-Hastings for a Gumbel distribution
 `python cli.py amh -e "(1/3) * exp(-((x - 2)/3) - exp(-((x - 2)/3)))" --initial 0 --iterations 50000 --initial-variance 1 --increase-factor 1.1 --decrease-factor 0.9 --burn-in 10000 --thin 1 --seed 42 --plot --save --output gumbel_samples.txt`
+
+## Metropolis-Hastings Example
+
+![image](https://github.com/user-attachments/assets/a44d6601-537f-427c-add8-46a6a48e91c4)
+
+## Adaptive Metropolis-Hastings Example
+
+![image](https://github.com/user-attachments/assets/b27eb69c-b137-40f6-a177-f9f4eb01d64e)
 
 ## Things To Do
 
