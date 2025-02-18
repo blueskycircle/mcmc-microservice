@@ -123,6 +123,8 @@ output/
 
 The MCMC microservice provides a REST API for running MCMC samplers. The API is built using FastAPI and provides two main endpoints.
 
+https://github.com/user-attachments/assets/43ca2ad7-a915-414d-be68-b884a6a4cbef
+
 ### Running the API Server
 
 ```bash
