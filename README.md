@@ -12,6 +12,8 @@
 
 ## Command Line Interface (CLI)
 
+https://github.com/user-attachments/assets/6dc543e9-7ade-4728-a7ce-668886a39597
+
 ### Get help
 `python cli.py --help`
 
