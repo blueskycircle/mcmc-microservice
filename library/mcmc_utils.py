@@ -28,30 +28,30 @@ def target_distribution(expression=None):
     try:
         # Attempt to parse the expression
         sympy_expr = sp.sympify(expression)
-        
+
         # Check if 'x' is in the expression
-        if 'x' not in str(sympy_expr.free_symbols):
+        if "x" not in str(sympy_expr.free_symbols):
             raise ValueError("Expression must contain the variable 'x'")
-        
+
         # Convert to numpy function
-        np_func = sp.lambdify('x', sympy_expr, modules=['numpy'])
-        
+        np_func = sp.lambdify("x", sympy_expr, modules=["numpy"])
+
         # Test evaluation
         try:
             test_value = float(np_func(0.0))
             if not np.isfinite(test_value):
                 raise ValueError("Expression evaluates to non-finite value")
         except Exception as e:
-            raise ValueError(f"Cannot evaluate expression: {str(e)}")
-        
+            raise ValueError(f"Cannot evaluate expression: {str(e)}") from e
+
         return np_func
-        
+
     except sp.SympifyError as e:
-        raise ValueError(f"Cannot parse mathematical expression: {str(e)}")
+        raise ValueError(f"Cannot parse mathematical expression: {str(e)}") from e
     except ValueError as e:
         raise e  # Re-raise ValueErrors
     except Exception as e:
-        raise ValueError(f"Invalid expression: {str(e)}")
+        raise ValueError(f"Invalid expression: {str(e)}") from e
 
 
 def proposal_distribution(x, variance=1.0):

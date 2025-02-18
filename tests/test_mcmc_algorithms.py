@@ -24,7 +24,7 @@ def test_metropolis_hastings():
         seed=seed,
     )
 
-    samples2, elapsed_time2, acceptance_rate2 = metropolis_hastings(
+    samples2, _, acceptance_rate2 = metropolis_hastings(
         target_dist,
         proposal_distribution,
         initial_value,
@@ -39,7 +39,7 @@ def test_metropolis_hastings():
     assert acceptance_rate1 == acceptance_rate2
 
     # Run with a different seed
-    samples3, elapsed_time3, acceptance_rate3 = metropolis_hastings(
+    samples3, _, _ = metropolis_hastings(
         target_dist,
         proposal_distribution,
         initial_value,
@@ -84,7 +84,7 @@ def test_adaptive_metropolis_hastings():
         seed=seed,
     )
 
-    samples2, time2, acc_rate2, acc_rates2 = adaptive_metropolis_hastings(
+    samples2, _, acc_rate2, acc_rates2 = adaptive_metropolis_hastings(
         target_dist,
         initial_value,
         num_iterations,
@@ -95,7 +95,7 @@ def test_adaptive_metropolis_hastings():
     )
 
     # Run with a different seed
-    samples3, time3, acc_rate3, acc_rates3 = adaptive_metropolis_hastings(
+    samples3, _, _, acc_rates3 = adaptive_metropolis_hastings(
         target_dist,
         initial_value,
         num_iterations,

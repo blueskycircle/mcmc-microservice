@@ -1,11 +1,9 @@
 import matplotlib
 
 matplotlib.use("Agg")  # Use non-interactive backend
-import matplotlib.pyplot as plt
 import os
 import time
 import click
-import sympy as sp
 import numpy as np
 import matplotlib.pyplot as plt
 from library.mcmc_utils import target_distribution, proposal_distribution
@@ -15,7 +13,6 @@ from library.mcmc_algorithms import metropolis_hastings, adaptive_metropolis_has
 @click.group()
 def cli():
     """MCMC sampling command line interface."""
-    pass
 
 
 @cli.command()
@@ -39,7 +36,9 @@ def cli():
     help="Number of initial samples to discard.",
 )
 @click.option("--thin", "-t", default=1, type=int, help="Keep every nth sample.")
-@click.option("--seed", "-s", default=None, type=int, help="Random seed for reproducibility.")
+@click.option(
+    "--seed", "-s", default=None, type=int, help="Random seed for reproducibility."
+)
 @click.option("--plot/--no-plot", default=True, help="Whether to display plots.")
 @click.option(
     "--save/--no-save", default=False, help="Whether to save the samples to a file."
@@ -51,7 +50,7 @@ def mh(expression, initial, iterations, burn_in, thin, seed, plot, save, output)
     """Run standard Metropolis-Hastings MCMC sampler."""
     try:
         target_dist = target_distribution(expression)
-        
+
         click.echo("Running Metropolis-Hastings sampler...")
         samples, elapsed_time, acceptance_rate = metropolis_hastings(
             target_dist,
@@ -60,7 +59,7 @@ def mh(expression, initial, iterations, burn_in, thin, seed, plot, save, output)
             iterations,
             burn_in=burn_in,
             thin=thin,
-            seed=seed
+            seed=seed,
         )
 
         process_results(
@@ -71,9 +70,13 @@ def mh(expression, initial, iterations, burn_in, thin, seed, plot, save, output)
     except (ValueError, TypeError, SyntaxError) as e:
         click.echo(f"Error: {str(e)}", err=True)
         return 1
-    except Exception as e:
-        click.echo(f"Error: Unexpected error occurred - {str(e)}", err=True)
+    except (RuntimeError, OverflowError, ZeroDivisionError) as e:
+        click.echo(f"Error: Computation failed - {str(e)}", err=True)
         return 1
+    except MemoryError as e:
+        click.echo("Error: Not enough memory to complete operation", err=True)
+        return 1
+
 
 @cli.command()
 @click.option(
@@ -111,7 +114,9 @@ def mh(expression, initial, iterations, burn_in, thin, seed, plot, save, output)
     help="Number of initial samples to discard.",
 )
 @click.option("--thin", "-t", default=1, type=int, help="Keep every nth sample.")
-@click.option("--seed", "-s", default=None, type=int, help="Random seed for reproducibility.")
+@click.option(
+    "--seed", "-s", default=None, type=int, help="Random seed for reproducibility."
+)
 @click.option("--plot/--no-plot", default=True, help="Whether to display plots.")
 @click.option(
     "--save/--no-save", default=False, help="Whether to save the samples to a file."
@@ -119,12 +124,25 @@ def mh(expression, initial, iterations, burn_in, thin, seed, plot, save, output)
 @click.option(
     "--output", "-o", default="samples.txt", help="Output file name for saving samples."
 )
-def amh(expression, initial, iterations, initial_variance, check_interval,
-        increase_factor, decrease_factor, burn_in, thin, seed, plot, save, output):
+def amh(
+    expression,
+    initial,
+    iterations,
+    initial_variance,
+    check_interval,
+    increase_factor,
+    decrease_factor,
+    burn_in,
+    thin,
+    seed,
+    plot,
+    save,
+    output,
+):
     """Run adaptive Metropolis-Hastings MCMC sampler."""
     try:
         target_dist = target_distribution(expression)
-        
+
         click.echo("Running Adaptive Metropolis-Hastings sampler...")
         samples, elapsed_time, acceptance_rate, acceptance_rates = (
             adaptive_metropolis_hastings(
@@ -137,21 +155,30 @@ def amh(expression, initial, iterations, initial_variance, check_interval,
                 decrease_factor=decrease_factor,
                 burn_in=burn_in,
                 thin=thin,
-                seed=seed
+                seed=seed,
             )
         )
 
         process_results(
-            samples, elapsed_time, acceptance_rate, target_dist, 
-            plot, save, output, acceptance_rates=acceptance_rates
+            samples,
+            elapsed_time,
+            acceptance_rate,
+            target_dist,
+            plot,
+            save,
+            output,
+            acceptance_rates=acceptance_rates,
         )
         return 0
 
     except (ValueError, TypeError, SyntaxError) as e:
         click.echo(f"Error: {str(e)}", err=True)
         return 1
-    except Exception as e:
-        click.echo(f"Error: Unexpected error occurred - {str(e)}", err=True)
+    except (RuntimeError, OverflowError, ZeroDivisionError) as e:
+        click.echo(f"Error: Computation failed - {str(e)}", err=True)
+        return 1
+    except MemoryError as e:
+        click.echo("Error: Not enough memory to complete operation", err=True)
         return 1
 
 
@@ -188,7 +215,7 @@ def process_results(
 
     if plot:
         n_plots = 3 if acceptance_rates is not None else 2
-        fig, axes = plt.subplots(n_plots, 1, figsize=(10, 4 * n_plots))
+        _, axes = plt.subplots(n_plots, 1, figsize=(10, 4 * n_plots))
 
         # Trace plot
         axes[0].plot(samples, color="blue")

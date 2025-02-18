@@ -48,7 +48,6 @@ def adaptive_metropolis_hastings(
     total_iterations = iterations + burn_in
     samples = [initial]
     current = initial
-    accepted = 0
     variance = initial_variance
     acceptance_rates = []
     interval_accepted = 0
@@ -68,7 +67,7 @@ def adaptive_metropolis_hastings(
             # Store sample if past burn-in and meets thinning criteria
             if i >= burn_in and (i - burn_in) % thin == 0:
                 samples.append(current)
-                
+
             # Check acceptance rate at each interval
             interval_count += 1
             if interval_count == check_interval:

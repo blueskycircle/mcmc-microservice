@@ -1,7 +1,10 @@
 import os
 import pytest
 from click.testing import CliRunner
-from cli import cli, mh, amh
+from cli import mh, amh
+
+# Safely ignore the pylint error: Redefining name 'runner' from outer scope
+# pylint: disable=redefined-outer-name
 
 
 @pytest.fixture
