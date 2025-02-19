@@ -227,6 +227,8 @@ curl -X 'POST' \
 
 The MCMC microservice provides an interactive web interface built with Streamlit for running and visualizing MCMC samplers.
 
+https://github.com/user-attachments/assets/ff8e5d92-b2e9-483d-a176-ffa3b0829c90
+
 ### Running the Web Application
 
 ```bash
