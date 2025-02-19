@@ -300,6 +300,76 @@ The application will automatically open in your default web browser at `http://l
    - Save configuration for reproducibility
    - Export samples for external analysis
 
+## Project Structure
+
+```
+mcmc-microservice/
+├── library/                      # Core MCMC implementation
+│   ├── __init__.py
+│   ├── mcmc_algorithms.py       # MCMC sampling algorithms
+│   └── mcmc_utils.py           # Utility functions and distributions
+│
+├── tests/                       # Test suite
+│   ├── __init__.py
+│   ├── test_api.py             # API endpoint tests
+│   ├── test_cli.py             # CLI functionality tests
+│   └── test_mcmc.py            # Core MCMC algorithm tests
+│
+├── api.py                      # FastAPI implementation
+├── cli.py                      # Command-line interface
+├── web_app.py                 # Streamlit web application
+├── requirements.txt           # Project dependencies
+└── README.md                 # Project documentation
+```
+
+### Key Components
+
+#### Core Library (`/library`)
+- `mcmc_algorithms.py`: Implements both standard and adaptive Metropolis-Hastings
+- `mcmc_utils.py`: Contains target distribution handling and proposal functions
+
+#### Interfaces
+- `cli.py`: Command-line interface using Click
+- `api.py`: RESTful API using FastAPI
+- `web_app.py`: Interactive web interface using Streamlit
+
+#### Tests (`/tests`)
+- Unit tests for all components
+- Integration tests for endpoints
+- MCMC algorithm validation
+
+### File Descriptions
+
+1. **Core Implementation**
+   - `mcmc_algorithms.py`: Contains `metropolis_hastings()` and `adaptive_metropolis_hastings()`
+   - `mcmc_utils.py`: Includes `target_distribution()` and `proposal_distribution()`
+
+2. **Interface Files**
+   - `cli.py`: Implements `mh` and `amh` commands
+   - `api.py`: Provides `/mcmc/mh` and `/mcmc/amh` endpoints
+   - `web_app.py`: Interactive dashboard with real-time visualization
+
+3. **Configuration Files**
+   - `requirements.txt`: Lists all Python dependencies
+   - `README.md`: Project documentation and usage guides
+
+4. **Test Files**
+   - `test_mcmc.py`: Core algorithm validation
+   - `test_cli.py`: Command-line interface testing
+   - `test_api.py`: API endpoint validation
+
+### Generated Files
+
+1. **Plots**
+   - Trace plots
+   - Histograms
+   - Acceptance rate plots (AMH)
+
+2. **Samples**
+   - Raw MCMC samples
+   - Configuration files
+   - CSV exports
+
 ## Things To Do
 
 1. Add more MCMC methods.
