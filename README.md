@@ -223,6 +223,81 @@ curl -X 'POST' \
   }'
 ```
 
+## Web Application (Streamlit)
+
+The MCMC microservice provides an interactive web interface built with Streamlit for running and visualizing MCMC samplers.
+
+### Running the Web Application
+
+```bash
+# Start the Streamlit app
+streamlit run web_app.py
+```
+
+The application will automatically open in your default web browser at `http://localhost:8501`.
+
+### Features
+
+#### Interactive Controls
+- Choose between standard MH and adaptive MH samplers
+- Adjust sampling parameters in real-time:
+  - Target distribution expression
+  - Number of iterations
+  - Burn-in period
+  - Thinning interval
+  - Random seed
+- AMH-specific parameters:
+  - Initial variance
+  - Check interval
+  - Increase/decrease factors
+
+#### Visualization Options
+- Interactive plots:
+  - Trace plot
+  - Histogram with target distribution overlay
+  - Acceptance rate over time (AMH only)
+- Plotly-powered interactive charts with zoom and pan capabilities
+
+#### Results and Downloads
+- Key metrics displayed:
+  - Elapsed time
+  - Acceptance rate
+  - Number of samples
+  - Autocorrelation statistics
+- Download options:
+  - Save samples as CSV
+  - Export configuration as JSON
+
+### Example Usage
+
+1. **Basic Sampling:**
+   - Select sampler type (MH or AMH)
+   - Use default standard normal distribution
+   - Click "Run Sampler"
+
+2. **Custom Distribution:**
+   - Enter your target distribution expression
+   - Example: `exp(-0.5 * (x - 2)**2) / sqrt(2 * pi)`
+   - Adjust parameters as needed
+   - Click "Run Sampler"
+
+3. **Visualization Customization:**
+   - Interact with plots (zoom, pan, hover)
+   - Download results for further analysis
+
+### Tips for Best Experience
+
+1. **Performance:**
+   - Start with smaller iterations for testing
+   - Increase iterations gradually for better sampling
+
+2. **Visualization:**
+   - Use plot interactions for detailed inspection
+
+3. **Downloads:**
+   - Save configuration for reproducibility
+   - Export samples for external analysis
+
 ## Things To Do
 
 1. Add more MCMC methods.
@@ -231,6 +306,8 @@ curl -X 'POST' \
 4. Add MCMC diagnostics.
 5. Containerize the tool with Docker.
 6. Add a test_invalid_expression test. This is very important.
+7. In the web application, allow the user to see the live updating progress bar.
+8. Create tests for the web application.
 
 ## Done 
 
