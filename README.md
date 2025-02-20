@@ -139,9 +139,9 @@ output/
 
 The MCMC microservice provides a REST API for running MCMC samplers. The API is built using FastAPI and provides two main endpoints.
 
-https://github.com/user-attachments/assets/622d308f-d49f-477e-8774-bf0121bb5158
+![API Demo 1](assets/api-demo-a.gif)
 
-https://github.com/user-attachments/assets/43ca2ad7-a915-414d-be68-b884a6a4cbef
+![API Demo 2](assets/api-demo-b.gif)
 
 ### Running the API Server
 
@@ -160,17 +160,11 @@ Runs the standard Metropolis-Hastings algorithm.
 
 **Example Request:**
 ```bash
-curl -X 'POST' \
-  'http://localhost:8000/mcmc/mh' \
-  -H 'accept: application/json' \
-  -H 'Content-Type: application/json' \
-  -d '{
-    "expression": "exp(-0.5 * x**2) / sqrt(2 * pi)",
-    "iterations": 1000,
-    "burn_in": 100,
-    "thin": 1,
-    "seed": 42
-  }'
+curl -X "POST" ^
+  "http://localhost:8000/mcmc/mh" ^
+  -H "accept: application/json" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"expression\": \"exp(-0.5 * x**2) / sqrt(2 * pi)\", \"iterations\": 1000, \"burn_in\": 100, \"thin\": 1, \"seed\": 42, \"credible_interval\": 0.95}"
 ```
 
 **Parameters:**
@@ -268,7 +262,7 @@ curl -X 'POST' \
 
 The MCMC microservice provides an interactive web interface built with Streamlit for running and visualizing MCMC samplers.
 
-https://github.com/user-attachments/assets/ff8e5d92-b2e9-483d-a176-ffa3b0829c90
+![WEB Demo](assets/web-app-demo.gif)
 
 ### Running the Web Application
 
