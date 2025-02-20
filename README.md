@@ -6,7 +6,7 @@
 
 The MCMC microservice provides two command-line tools for MCMC sampling: standard Metropolis-Hastings (`mh`) and adaptive Metropolis-Hastings (`amh`).
 
-https://github.com/user-attachments/assets/6dc543e9-7ade-4728-a7ce-668886a39597
+![CLI Demo](assets/cli-demo.gif)
 
 ### Installation
 
