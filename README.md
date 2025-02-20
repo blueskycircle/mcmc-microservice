@@ -38,15 +38,31 @@ python cli.py mh --iterations 10000
 ```
 
 **Key Parameters:**
-- `-e, --expression`: Mathematical expression for target distribution
-- `-i, --initial`: Initial value (default: 0.0)
-- `-n, --iterations`: Number of iterations (default: 10000)
+- `-e, --expression`: Mathematical expression for target distribution (default: standard normal)
+- `-i, --initial`: Initial value to start the chain (default: 0.0)
+- `-n, --iterations`: Number of iterations to run (default: 10000)
 - `-b, --burn-in`: Number of initial samples to discard (default: 1000)
 - `-t, --thin`: Keep every nth sample (default: 1)
-- `-s, --seed`: Random seed for reproducibility
+- `-s, --seed`: Random seed for reproducibility (optional)
 - `--plot/--no-plot`: Enable/disable plotting (default: enabled)
 - `--save/--no-save`: Save samples to file (default: disabled)
-- `-o, --output`: Output filename (default: "samples.txt")
+- `-o, --output`: Output filename for saving samples (default: "samples.txt")
+- `--credible-interval`: Credible interval level between 0 and 1 (default: 0.95)
+
+**Example with all parameters:**
+```bash
+python cli.py mh \
+    --expression "exp(-0.5 * x**2) / sqrt(2 * pi)" \
+    --initial 0.0 \
+    --iterations 10000 \
+    --burn-in 1000 \
+    --thin 1 \
+    --seed 42 \
+    --plot \
+    --save \
+    --output "samples.txt" \
+    --credible-interval 0.95
+```
 
 ### Adaptive Metropolis-Hastings (amh)
 
@@ -201,7 +217,32 @@ Both endpoints return JSON responses with the following structure:
   "samples": [...],              // Array of MCMC samples
   "elapsed_time": 1.23,         // Time taken in seconds
   "acceptance_rate": 0.45,      // Overall acceptance rate
-  "acceptance_rates": [...]     // (AMH only) Array of acceptance rates over time
+  "mean": 0.123,               // Sample mean
+  "median": 0.456,             // Sample median
+  "credible_interval": [       // Credible interval bounds
+    -1.96,
+    1.96
+  ]
+}
+```
+
+The AMH endpoint additionally returns:
+```json
+{
+  "acceptance_rates": [...]     // Array of acceptance rates over time
+}
+```
+
+**Example Response:**
+```json
+{
+  "samples": [0.123, -0.456, 0.789, ...],
+  "elapsed_time": 1.23,
+  "acceptance_rate": 0.45,
+  "mean": 0.157,
+  "median": 0.162,
+  "credible_interval": [-1.89, 2.14],
+  "acceptance_rates": [0.48, 0.46, 0.44]  // AMH only
 }
 ```
 
