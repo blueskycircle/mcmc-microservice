@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from library.mcmc_utils import target_distribution
 from library.mcmc_algorithms import metropolis_hastings, adaptive_metropolis_hastings
 from library.mcmc_utils import proposal_distribution
@@ -15,6 +15,7 @@ app = FastAPI(
 )
 
 
+# Update the response models to include new statistics
 class MCMCRequest(BaseModel):
     expression: Optional[str] = DEFAULT_DISTRIBUTION
     initial: float = 0.0
@@ -22,6 +23,27 @@ class MCMCRequest(BaseModel):
     burn_in: int = 1000
     thin: int = 1
     seed: Optional[int] = None
+    credible_interval: float = 0.95
+
+    @field_validator("credible_interval")
+    @classmethod
+    def validate_credible_interval(cls, v: float) -> float:
+        if v <= 0 or v >= 1:
+            raise ValueError("Credible interval must be between 0 and 1")
+        return v
+
+
+class MCMCResponse(BaseModel):
+    samples: List[float]
+    elapsed_time: float
+    acceptance_rate: float
+    mean: float
+    median: float
+    credible_interval: tuple[float, float]
+
+
+class AdaptiveMCMCResponse(MCMCResponse):
+    acceptance_rates: List[float]
 
 
 class AdaptiveMCMCRequest(MCMCRequest):
@@ -31,23 +53,13 @@ class AdaptiveMCMCRequest(MCMCRequest):
     decrease_factor: float = 0.9
 
 
-class MCMCResponse(BaseModel):
-    samples: List[float]
-    elapsed_time: float
-    acceptance_rate: float
-
-
-class AdaptiveMCMCResponse(MCMCResponse):
-    acceptance_rates: List[float]
-
-
 @app.post("/mcmc/mh", response_model=MCMCResponse)
 async def run_metropolis_hastings(request: MCMCRequest):
     """Run standard Metropolis-Hastings MCMC sampler."""
     try:
         target_dist = target_distribution(request.expression)
 
-        samples, elapsed_time, acceptance_rate = metropolis_hastings(
+        samples, elapsed_time, acceptance_rate, mean, median, ci = metropolis_hastings(
             target_dist,
             proposal_distribution,
             request.initial,
@@ -55,12 +67,16 @@ async def run_metropolis_hastings(request: MCMCRequest):
             burn_in=request.burn_in,
             thin=request.thin,
             seed=request.seed,
+            credible_interval=request.credible_interval,
         )
 
         return {
             "samples": samples.tolist(),
             "elapsed_time": elapsed_time,
             "acceptance_rate": acceptance_rate,
+            "mean": mean,
+            "median": median,
+            "credible_interval": ci,
         }
 
     except Exception as e:
@@ -73,7 +89,7 @@ async def run_adaptive_metropolis_hastings(request: AdaptiveMCMCRequest):
     try:
         target_dist = target_distribution(request.expression)
 
-        samples, elapsed_time, acceptance_rate, acceptance_rates = (
+        samples, elapsed_time, acceptance_rate, acceptance_rates, mean, median, ci = (
             adaptive_metropolis_hastings(
                 target_dist,
                 request.initial,
@@ -85,6 +101,7 @@ async def run_adaptive_metropolis_hastings(request: AdaptiveMCMCRequest):
                 burn_in=request.burn_in,
                 thin=request.thin,
                 seed=request.seed,
+                credible_interval=request.credible_interval,
             )
         )
 
@@ -93,6 +110,9 @@ async def run_adaptive_metropolis_hastings(request: AdaptiveMCMCRequest):
             "elapsed_time": elapsed_time,
             "acceptance_rate": acceptance_rate,
             "acceptance_rates": acceptance_rates,
+            "mean": mean,
+            "median": median,
+            "credible_interval": ci,
         }
 
     except Exception as e:

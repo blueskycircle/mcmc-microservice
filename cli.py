@@ -10,6 +10,29 @@ from library.mcmc_utils import target_distribution, proposal_distribution
 from library.mcmc_algorithms import metropolis_hastings, adaptive_metropolis_hastings
 
 
+def validate_credible_interval(_ctx, _param, value):
+    """
+    Validate credible interval is between 0 and 1 exclusive.
+
+    Args:
+        _ctx: Click context (unused)
+        _param: Click parameter (unused)
+        value: The credible interval value to validate
+
+    Returns:
+        float: The validated credible interval value
+
+    Raises:
+        click.BadParameter: If value is not between 0 and 1 or if value is invalid
+    """
+    try:
+        if value <= 0 or value >= 1:
+            raise click.BadParameter("Credible interval must be between 0 and 1")
+        return value
+    except ValueError as exc:
+        raise click.BadParameter("Credible interval must be a valid number") from exc
+
+
 @click.group()
 def cli():
     """MCMC sampling command line interface."""
@@ -46,13 +69,31 @@ def cli():
 @click.option(
     "--output", "-o", default="samples.txt", help="Output file name for saving samples."
 )
-def mh(expression, initial, iterations, burn_in, thin, seed, plot, save, output):
+@click.option(
+    "--credible-interval",
+    default=0.95,
+    type=float,
+    help="Credible interval level (0 to 1).",
+    callback=validate_credible_interval,
+)
+def mh(
+    expression,
+    initial,
+    iterations,
+    burn_in,
+    thin,
+    seed,
+    plot,
+    save,
+    output,
+    credible_interval,
+):
     """Run standard Metropolis-Hastings MCMC sampler."""
     try:
         target_dist = target_distribution(expression)
 
         click.echo("Running Metropolis-Hastings sampler...")
-        samples, elapsed_time, acceptance_rate = metropolis_hastings(
+        samples, elapsed_time, acceptance_rate, mean, median, ci = metropolis_hastings(
             target_dist,
             proposal_distribution,
             initial,
@@ -60,10 +101,21 @@ def mh(expression, initial, iterations, burn_in, thin, seed, plot, save, output)
             burn_in=burn_in,
             thin=thin,
             seed=seed,
+            credible_interval=credible_interval,
         )
 
         process_results(
-            samples, elapsed_time, acceptance_rate, target_dist, plot, save, output
+            samples,
+            elapsed_time,
+            acceptance_rate,
+            target_dist,
+            plot,
+            save,
+            output,
+            mean=mean,
+            median=median,
+            credible_interval=ci,
+            ci_level=credible_interval,
         )
         return 0
 
@@ -124,6 +176,13 @@ def mh(expression, initial, iterations, burn_in, thin, seed, plot, save, output)
 @click.option(
     "--output", "-o", default="samples.txt", help="Output file name for saving samples."
 )
+@click.option(
+    "--credible-interval",
+    default=0.95,
+    type=float,
+    help="Credible interval level (0 to 1).",
+    callback=validate_credible_interval,
+)
 def amh(
     expression,
     initial,
@@ -138,13 +197,14 @@ def amh(
     plot,
     save,
     output,
+    credible_interval,
 ):
     """Run adaptive Metropolis-Hastings MCMC sampler."""
     try:
         target_dist = target_distribution(expression)
 
         click.echo("Running Adaptive Metropolis-Hastings sampler...")
-        samples, elapsed_time, acceptance_rate, acceptance_rates = (
+        samples, elapsed_time, acceptance_rate, acceptance_rates, mean, median, ci = (
             adaptive_metropolis_hastings(
                 target_dist,
                 initial,
@@ -156,6 +216,7 @@ def amh(
                 burn_in=burn_in,
                 thin=thin,
                 seed=seed,
+                credible_interval=credible_interval,
             )
         )
 
@@ -168,6 +229,10 @@ def amh(
             save,
             output,
             acceptance_rates=acceptance_rates,
+            mean=mean,
+            median=median,
+            credible_interval=ci,
+            ci_level=credible_interval,
         )
         return 0
 
@@ -191,12 +256,27 @@ def process_results(
     save,
     output,
     acceptance_rates=None,
+    mean=None,
+    median=None,
+    credible_interval=None,
+    ci_level=0.95,
 ):
     """Process and display MCMC results."""
 
     click.echo(f"Time taken: {elapsed_time:.2f} seconds")
     click.echo(f"Acceptance rate: {acceptance_rate:.2f}")
     click.echo(f"Number of samples: {len(samples)}")
+
+    if mean is not None:
+        click.echo(f"Sample mean: {mean:.4f}")
+    if median is not None:
+        click.echo(f"Sample median: {median:.4f}")
+    if credible_interval is not None:
+        ci_lower, ci_upper = credible_interval
+        ci_level_percent = int(ci_level * 100)
+        click.echo(
+            f"Sample {ci_level_percent}% Credible interval: ({ci_lower:.4f}, {ci_upper:.4f})"
+        )
 
     # Create output directories if they don't exist
     output_dir = "output"

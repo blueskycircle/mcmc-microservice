@@ -14,6 +14,7 @@ def adaptive_metropolis_hastings(
     burn_in=1000,
     thin=1,
     seed=None,
+    credible_interval=0.95,
 ):
     """
     Adaptive Metropolis-Hastings algorithm with burn-in and thinning.
@@ -29,6 +30,8 @@ def adaptive_metropolis_hastings(
         burn_in (int, optional): Number of initial samples to discard. Defaults to 1000
         thin (int, optional): Keep every nth sample. Defaults to 1
         seed (int, optional): Random seed for reproducibility. Defaults to None
+        credible_interval (float, optional): Credible interval level (0 to 1). Defaults to 0.95
+
 
     Returns:
         tuple: A tuple containing:
@@ -36,6 +39,9 @@ def adaptive_metropolis_hastings(
             - float: Elapsed time in seconds
             - float: Overall acceptance rate between 0 and 1
             - list[float]: List of acceptance rates at each check interval
+            - float: Mean of the samples
+            - float: Median of the samples
+            - tuple: Credible interval (lower, upper) bounds
 
     Example:
         >>> target_dist = target_distribution('exp(-0.5 * x**2) / sqrt(2 * pi)')
@@ -46,7 +52,7 @@ def adaptive_metropolis_hastings(
         np.random.seed(seed)
 
     total_iterations = iterations + burn_in
-    samples = [initial]
+    samples = []
     current = initial
     variance = initial_variance
     acceptance_rates = []
@@ -87,7 +93,24 @@ def adaptive_metropolis_hastings(
     elapsed_time = end_time - start_time
     overall_acceptance_rate = np.mean(acceptance_rates) if acceptance_rates else 0
 
-    return np.array(samples), elapsed_time, overall_acceptance_rate, acceptance_rates
+    samples_array = np.array(samples)
+    sample_mean = np.mean(samples_array)
+    sample_median = np.median(samples_array)
+
+    # Calculate credible interval
+    alpha = (1 - credible_interval) / 2
+    ci_lower = np.percentile(samples_array, 100 * alpha)
+    ci_upper = np.percentile(samples_array, 100 * (1 - alpha))
+
+    return (
+        samples_array,
+        elapsed_time,
+        overall_acceptance_rate,
+        acceptance_rates,
+        sample_mean,
+        sample_median,
+        (ci_lower, ci_upper),
+    )
 
 
 def adaptive_proposal_distribution(
@@ -101,7 +124,14 @@ def adaptive_proposal_distribution(
 
 
 def metropolis_hastings(
-    target, proposal, initial, iterations, burn_in=1000, thin=1, seed=None
+    target,
+    proposal,
+    initial,
+    iterations,
+    burn_in=1000,
+    thin=1,
+    seed=None,
+    credible_interval=0.95,
 ):
     """
     Metropolis-Hastings algorithm with burn-in and thinning.
@@ -114,12 +144,16 @@ def metropolis_hastings(
         burn_in (int, optional): Number of initial samples to discard. Defaults to 1000
         thin (int, optional): Keep every nth sample. Defaults to 1
         seed (int, optional): Random seed for reproducibility. Defaults to None
+        credible_interval (float, optional): Credible interval level (0 to 1). Defaults to 0.95
 
     Returns:
         tuple: A tuple containing:
             - numpy.ndarray: Array of samples from the target distribution
             - float: Elapsed time in seconds
             - float: Acceptance rate between 0 and 1
+            - float: Mean of the samples
+            - float: Median of the
+            - tuple: Credible interval (lower, upper) bounds
 
     Example:
         >>> target_dist = target_distribution('exp(-0.5 * x**2) / sqrt(2 * pi)')
@@ -130,7 +164,7 @@ def metropolis_hastings(
         np.random.seed(seed)
 
     total_iterations = iterations + burn_in
-    samples = [initial]
+    samples = []
     current = initial
     accepted = 0
     start_time = time.time()
@@ -155,4 +189,20 @@ def metropolis_hastings(
     elapsed_time = end_time - start_time
     acceptance_rate = accepted / iterations
 
-    return np.array(samples), elapsed_time, acceptance_rate
+    samples_array = np.array(samples)
+    sample_mean = np.mean(samples_array)
+    sample_median = np.median(samples_array)
+
+    # Calculate credible interval
+    alpha = (1 - credible_interval) / 2
+    ci_lower = np.percentile(samples_array, 100 * alpha)
+    ci_upper = np.percentile(samples_array, 100 * (1 - alpha))
+
+    return (
+        samples_array,
+        elapsed_time,
+        acceptance_rate,
+        sample_mean,
+        sample_median,
+        (ci_lower, ci_upper),
+    )

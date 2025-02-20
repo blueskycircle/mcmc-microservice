@@ -53,6 +53,59 @@ with st.sidebar:
         "Select MCMC Sampler", ["Metropolis-Hastings", "Adaptive Metropolis-Hastings"]
     )
 
+    # Add descriptions with LaTeX
+    if sampler_type == "Metropolis-Hastings":
+        st.markdown(
+            """
+        #### Metropolis-Hastings Algorithm
+        
+        The MH algorithm generates samples from a target distribution $p(x)$ using a proposal distribution $q(y|x)$:
+
+        1. **Proposal Step**: Generate candidate $y$ from $q(y|x)$
+        
+        2. **Acceptance Step**: Calculate acceptance probability:
+        $$\\alpha(x, y) = min\\left(1, \\frac{p(y)q(x|y)}{p(x)q(y|x)}\\right)$$
+        
+        3. **Update Step**: Accept $y$ with probability $\\alpha(x, y)$:
+                    
+        Set $x_{t+1} = y$ with probability $\\alpha(x, y)$
+
+        where:
+        - $p(x)$ is the target distribution
+        - $q(y|x)$ is the proposal distribution
+        - $x_t$ is the current state
+        - $y$ is the proposed state
+        - $\\alpha(x, y)$ is the acceptance probability
+        """
+        )
+    else:
+        st.markdown(
+            """
+        #### Adaptive Metropolis-Hastings Algorithm
+        
+        The AMH algorithm extends MH by adapting the proposal distribution's variance:
+
+        1. **Proposal Step**: Generate candidate from $N(x_t, \\sigma_t^2)$:
+        $$y \\sim N(x_t, \\sigma_t^2)$$
+        
+        2. **Acceptance Step**: Calculate MH ratio:
+        $$\\alpha(x_t, y) = min\\left(1, \\frac{p(y)}{p(x_t)}\\right)$$
+        
+        3. **Adaptation Step**: Update proposal variance every $n$ iterations:
+                    
+        If $\\bar{\\alpha}_n > 0.5$: Set $\\sigma_{t+1} = \\sigma_t \\cdot f_{inc}$
+        
+        If $\\bar{\\alpha}_n < 0.3$: Set $\\sigma_{t+1} = \\sigma_t \\cdot f_{dec}$
+
+        
+        where:
+        - $\\sigma_t^2$ is the proposal variance at time $t$
+        - $\\bar{\\alpha}_n$ is the acceptance rate over the last $n$ iterations (Check Interval)
+        - $f_{inc}$ is the increase factor
+        - $f_{dec}$ is the decrease factor
+        """
+        )
+
     # Common parameters
     st.subheader("Common Parameters")
     expression = st.text_input(
@@ -70,6 +123,15 @@ with st.sidebar:
         thin = st.number_input("Thinning", min_value=1, value=1)
 
     seed = st.number_input("Random Seed", min_value=0, value=42)
+
+    credible_interval = st.number_input(
+        "Credible Interval",
+        min_value=0.01,
+        max_value=0.99,
+        value=0.95,
+        step=0.01,
+        help="Confidence level for the credible interval (between 0 and 1)",
+    )
 
     # AMH specific parameters
     if sampler_type == "Adaptive Metropolis-Hastings":
@@ -108,31 +170,41 @@ try:
         # Run selected sampler
         if sampler_type == "Metropolis-Hastings":
             status_text.text("Running Metropolis-Hastings sampler...")
-            samples, elapsed_time, acceptance_rate = metropolis_hastings(
-                target_dist,
-                proposal_distribution,
-                initial,
-                iterations,
-                burn_in=burn_in,
-                thin=thin,
-                seed=seed,
+            samples, elapsed_time, acceptance_rate, mean, median, ci = (
+                metropolis_hastings(
+                    target_dist,
+                    proposal_distribution,
+                    initial,
+                    iterations,
+                    burn_in=burn_in,
+                    thin=thin,
+                    seed=seed,
+                    credible_interval=credible_interval,
+                )
             )
             acceptance_rates = None
         else:
             status_text.text("Running Adaptive Metropolis-Hastings sampler...")
-            samples, elapsed_time, acceptance_rate, acceptance_rates = (
-                adaptive_metropolis_hastings(
-                    target_dist,
-                    initial,
-                    iterations,
-                    initial_variance=initial_variance,
-                    check_interval=check_interval,
-                    increase_factor=increase_factor,
-                    decrease_factor=decrease_factor,
-                    burn_in=burn_in,
-                    thin=thin,
-                    seed=seed,
-                )
+            (
+                samples,
+                elapsed_time,
+                acceptance_rate,
+                acceptance_rates,
+                mean,
+                median,
+                ci,
+            ) = adaptive_metropolis_hastings(
+                target_dist,
+                initial,
+                iterations,
+                initial_variance=initial_variance,
+                check_interval=check_interval,
+                increase_factor=increase_factor,
+                decrease_factor=decrease_factor,
+                burn_in=burn_in,
+                thin=thin,
+                seed=seed,
+                credible_interval=credible_interval,
             )
 
         progress_bar.progress(70)
@@ -142,10 +214,16 @@ try:
         col1, col2, col3 = st.columns(3)
         with col1:
             st.metric("Elapsed Time", f"{elapsed_time:.2f} seconds")
+            st.metric("Mean", f"{mean:.4f}")
         with col2:
             st.metric("Acceptance Rate", f"{acceptance_rate:.2%}")
+            st.metric("Median", f"{median:.4f}")
         with col3:
             st.metric("Number of Samples", len(samples))
+            st.metric(
+                f"{credible_interval*100:.0f}% Credible Interval",
+                f"({ci[0]:.4f}, {ci[1]:.4f})",
+            )
 
         # Create tabs for different visualizations
         tab1, tab2, tab3 = st.tabs(["📈 Trace Plot", "📊 Histogram", "📉 Diagnostics"])

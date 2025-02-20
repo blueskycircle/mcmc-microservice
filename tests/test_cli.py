@@ -103,3 +103,111 @@ def test_burn_in_and_thin(runner):
             mh, ["--iterations", "100", "--burn-in", "20", "--thin", "2", "--no-plot"]
         )
         assert result.exit_code == 0
+
+
+def test_mh_statistics_output(runner):
+    """Test that MH outputs statistical summaries."""
+    with runner.isolated_filesystem():
+        result = runner.invoke(mh, ["--iterations", "100", "--no-plot"])
+        assert result.exit_code == 0
+        assert "Sample mean:" in result.output
+        assert "Sample median:" in result.output
+        assert "95% Credible interval:" in result.output
+
+
+def test_amh_statistics_output(runner):
+    """Test that AMH outputs statistical summaries."""
+    with runner.isolated_filesystem():
+        result = runner.invoke(amh, ["--iterations", "100", "--no-plot"])
+        assert result.exit_code == 0
+        assert "Sample mean:" in result.output
+        assert "Sample median:" in result.output
+        assert "95% Credible interval:" in result.output
+
+
+def test_custom_credible_interval(runner):
+    """Test custom credible interval level."""
+    with runner.isolated_filesystem():
+        result = runner.invoke(
+            mh, ["--iterations", "100", "--no-plot", "--credible-interval", "0.99"]
+        )
+        assert result.exit_code == 0
+        assert "99% Credible interval:" in result.output
+
+
+def test_invalid_credible_interval(runner):
+    """Test error handling for invalid credible interval."""
+    with runner.isolated_filesystem():
+        # Test value greater than 1
+        result = runner.invoke(
+            mh, ["--iterations", "100", "--credible-interval", "1.5"]
+        )
+        assert (
+            result.exit_code == 2
+        )  # Click uses exit code 2 for parameter validation errors
+        assert (
+            "Error: Invalid value for '--credible-interval': Credible interval must be between 0 and 1"
+            in result.output
+        )
+
+        # Test negative value
+        result = runner.invoke(
+            mh, ["--iterations", "100", "--credible-interval", "-0.5"]
+        )
+        assert result.exit_code == 2
+        assert (
+            "Error: Invalid value for '--credible-interval': Credible interval must be between 0 and 1"
+            in result.output
+        )
+
+        # Test value of zero
+        result = runner.invoke(mh, ["--iterations", "100", "--credible-interval", "0"])
+        assert result.exit_code == 2
+        assert (
+            "Error: Invalid value for '--credible-interval': Credible interval must be between 0 and 1"
+            in result.output
+        )
+
+        # Test value of one
+        result = runner.invoke(mh, ["--iterations", "100", "--credible-interval", "1"])
+        assert result.exit_code == 2
+        assert (
+            "Error: Invalid value for '--credible-interval': Credible interval must be between 0 and 1"
+            in result.output
+        )
+
+
+def test_seed_reproducibility_statistics(runner):
+    """Test that using same seed produces same statistics."""
+    with runner.isolated_filesystem():
+        result1 = runner.invoke(
+            mh, ["--iterations", "100", "--seed", "42", "--no-plot"]
+        )
+        result2 = runner.invoke(
+            mh, ["--iterations", "100", "--seed", "42", "--no-plot"]
+        )
+
+        # Extract statistics from output
+        mean1 = [line for line in result1.output.split("\n") if "Sample mean:" in line][
+            0
+        ]
+        mean2 = [line for line in result2.output.split("\n") if "Sample mean:" in line][
+            0
+        ]
+        assert mean1 == mean2
+
+        median1 = [
+            line for line in result1.output.split("\n") if "Sample median:" in line
+        ][0]
+        median2 = [
+            line for line in result2.output.split("\n") if "Sample median:" in line
+        ][0]
+        assert median1 == median2
+
+        ci1 = [
+            line for line in result1.output.split("\n") if "Credible interval:" in line
+        ][0]
+        ci2 = [
+            line for line in result2.output.split("\n") if "Credible interval:" in line
+        ][0]
+        assert ci1 == ci2
