@@ -2,6 +2,8 @@
 
 [![Python application test with Github Actions](https://github.com/blueskycircle/mcmc-microservice/actions/workflows/main.yml/badge.svg)](https://github.com/blueskycircle/mcmc-microservice/actions/workflows/main.yml)
 
+The `mcmc-microservice` is a versatile toolkit for Markov Chain Monte Carlo (MCMC) sampling. It provides a command-line interface (CLI), a RESTful API, and an interactive web application for running MCMC algorithms. This project enables users to sample from custom target distributions, visualize results in real-time, and export samples for further analysis.
+
 ## Table of Contents
 
 1.  [Command Line Interface (CLI)](#command-line-interface-cli)
