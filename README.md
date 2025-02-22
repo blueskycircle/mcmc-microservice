@@ -2,6 +2,35 @@
 
 [![Python application test with Github Actions](https://github.com/blueskycircle/mcmc-microservice/actions/workflows/main.yml/badge.svg)](https://github.com/blueskycircle/mcmc-microservice/actions/workflows/main.yml)
 
+## Table of Contents
+
+1.  [Command Line Interface (CLI)](#command-line-interface-cli)
+    *   [Installation](#installation)
+    *   [Basic Usage](#basic-usage)
+    *   [Standard Metropolis-Hastings (mh)](#standard-metropolis-hastings-mh)
+    *   [Adaptive Metropolis-Hastings (amh)](#adaptive-metropolis-hastings-amh)
+    *   [Examples](#examples)
+    *   [Output](#output)
+    *   [File Structure](#file-structure)
+2.  [Application Programming Interface (API)](#application-programming-interface-api)
+    *   [Running the API Server](#running-the-api-server)
+    *   [Endpoints](#endpoints)
+        *   [Standard Metropolis-Hastings (/mcmc/mh)](#standard-metropolis-hastings-mcmcmh)
+        *   [Adaptive Metropolis-Hastings (/mcmc/amh)](#adaptive-metropolis-hastings-mcmcamh)
+    *   [Response Format](#response-format)
+    *   [Examples](#examples-1)
+3.  [Web Application (Streamlit)](#web-application-streamlit)
+    *   [Running the Web Application](#running-the-web-application)
+    *   [Features](#features-1)
+    *   [Example Usage](#example-usage)
+    *   [Tips for Best Experience](#tips-for-best-experience)
+4.  [Project Structure](#project-structure)
+    *   [Key Components](#key-components)
+    *   [File Descriptions](#file-descriptions)
+    *   [Generated Files](#generated-files)
+5.  [Further Work](#further-work)
+
+
 ## Command Line Interface (CLI)
 
 The MCMC microservice provides two command-line tools for MCMC sampling: standard Metropolis-Hastings (`mh`) and adaptive Metropolis-Hastings (`amh`).
@@ -10,7 +39,7 @@ The MCMC microservice provides two command-line tools for MCMC sampling: standar
 
 ### Installation
 
-```bash
+```cmd
 # Clone the repository
 git clone https://github.com/blueskycircle/mcmc-microservice.git
 cd mcmc-microservice
@@ -22,7 +51,7 @@ pip install -r requirements.txt
 ### Basic Usage
 
 Get help and view all available commands:
-```bash
+```cmd
 python cli.py --help
 
 # View options for specific command
@@ -33,7 +62,7 @@ python cli.py amh --help
 ### Standard Metropolis-Hastings (mh)
 
 Basic sampling from standard normal distribution:
-```bash
+```cmd
 python cli.py mh --iterations 10000
 ```
 
@@ -50,27 +79,27 @@ python cli.py mh --iterations 10000
 - `--credible-interval`: Credible interval level between 0 and 1 (default: 0.95)
 
 **Example with all parameters:**
-```bash
-python cli.py mh \
-    --expression "exp(-0.5 * x**2) / sqrt(2 * pi)" \
-    --initial 0.0 \
-    --iterations 10000 \
-    --burn-in 1000 \
-    --thin 1 \
-    --seed 42 \
-    --plot \
-    --save \
-    --output "samples.txt" \
+```cmd
+python cli.py mh  ^
+    --expression "exp(-0.5 * x**2) / sqrt(2 * pi)" ^
+    --initial 0.0 ^
+    --iterations 10000 ^
+    --burn-in 1000 ^
+    --thin 1 ^
+    --seed 42 ^
+    --plot ^
+    --save ^
+    --output "samples.txt" ^
     --credible-interval 0.95
 ```
 
 ### Adaptive Metropolis-Hastings (amh)
 
 Sample from a custom distribution with adaptive proposal:
-```bash
-python cli.py amh \
-    -e "exp(-0.5 * (x - 2)**2) / sqrt(2 * pi)" \
-    -n 20000 \
+```cmd
+python cli.py amh ^ 
+    -e "exp(-0.5 * (x - 2)**2) / sqrt(2 * pi)" ^
+    -n 20000 ^
     --initial-variance 2.0
 ```
 
@@ -83,29 +112,29 @@ python cli.py amh \
 ### Examples
 
 1. **Save samples without plotting:**
-```bash
+```cmd
 python cli.py mh --no-plot --save -o "mh_samples.txt"
 ```
 
 2. **Reproducible sampling with seed:**
-```bash
+```cmd
 python cli.py mh --iterations 1000 --seed 42
 ```
 
 3. **Sample from Gumbel distribution:**
-```bash
-python cli.py amh \
-    -e "(1/3) * exp(-((x - 2)/3) - exp(-((x - 2)/3)))" \
-    --initial 0 \
-    --iterations 50000 \
-    --initial-variance 1 \
-    --increase-factor 1.1 \
-    --decrease-factor 0.9 \
-    --burn-in 10000 \
-    --thin 1 \
-    --seed 42 \
-    --plot \
-    --save \
+```cmd
+python cli.py amh ^
+    -e "(1/3) * exp(-((x - 2)/3) - exp(-((x - 2)/3)))" ^
+    --initial 0 ^
+    --iterations 50000 ^
+    --initial-variance 1 ^
+    --increase-factor 1.1 ^
+    --decrease-factor 0.9 ^
+    --burn-in 10000 ^
+    --thin 1 ^
+    --seed 42 ^
+    --plot ^
+    --save ^
     --output gumbel_samples.txt
 ```
 
@@ -145,7 +174,7 @@ The MCMC microservice provides a REST API for running MCMC samplers. The API is 
 
 ### Running the API Server
 
-```bash
+```cmd
 # Start the API server
 python api.py
 ```
@@ -159,7 +188,7 @@ The server runs at `http://localhost:8000` by default. Access the interactive AP
 Runs the standard Metropolis-Hastings algorithm.
 
 **Example Request:**
-```bash
+```cmd
 curl -X "POST" ^
   "http://localhost:8000/mcmc/mh" ^
   -H "accept: application/json" ^
@@ -180,20 +209,12 @@ curl -X "POST" ^
 Runs the adaptive Metropolis-Hastings algorithm with automatic proposal tuning.
 
 **Example Request:**
-```bash
-curl -X 'POST' \
-  'http://localhost:8000/mcmc/amh' \
-  -H 'accept: application/json' \
-  -H 'Content-Type: application/json' \
-  -d '{
-    "expression": "exp(-0.5 * x**2) / sqrt(2 * pi)",
-    "iterations": 1000,
-    "initial_variance": 1.0,
-    "check_interval": 100,
-    "increase_factor": 1.1,
-    "decrease_factor": 0.9,
-    "seed": 42
-  }'
+```cmd
+curl -X "POST" ^
+  "http://localhost:8000/mcmc/amh" ^
+  -H "accept: application/json" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"expression\": \"exp(-0.5 * x**2) / sqrt(2 * pi)\", \"iterations\": 1000, \"initial_variance\": 1.0, \"check_interval\": 100, \"increase_factor\": 1.1, \"decrease_factor\": 0.9, \"seed\": 42}"
 ```
 
 **Additional Parameters:**
@@ -208,22 +229,19 @@ Both endpoints return JSON responses with the following structure:
 
 ```json
 {
-  "samples": [...],              // Array of MCMC samples
-  "elapsed_time": 1.23,         // Time taken in seconds
-  "acceptance_rate": 0.45,      // Overall acceptance rate
-  "mean": 0.123,               // Sample mean
-  "median": 0.456,             // Sample median
-  "credible_interval": [       // Credible interval bounds
-    -1.96,
-    1.96
-  ]
+  "samples": [...],
+  "elapsed_time": 1.23,
+  "acceptance_rate": 0.45,
+  "mean": 0.123,
+  "median": 0.456, 
+  "credible_interval": [-1.96, 1.96]
 }
 ```
 
 The AMH endpoint additionally returns:
 ```json
 {
-  "acceptance_rates": [...]     // Array of acceptance rates over time
+  "acceptance_rates": [...] 
 }
 ```
 
@@ -236,26 +254,19 @@ The AMH endpoint additionally returns:
   "mean": 0.157,
   "median": 0.162,
   "credible_interval": [-1.89, 2.14],
-  "acceptance_rates": [0.48, 0.46, 0.44]  // AMH only
+  "acceptance_rates": [0.48, 0.46, 0.44]
 }
 ```
 
 ### Examples
 
 #### Sampling from a Gumbel Distribution
-```bash
-curl -X 'POST' \
-  'http://localhost:8000/mcmc/amh' \
-  -H 'accept: application/json' \
-  -H 'Content-Type: application/json' \
-  -d '{
-    "expression": "(1/3) * exp(-((x - 2)/3) - exp(-((x - 2)/3)))",
-    "iterations": 50000,
-    "initial_variance": 1.0,
-    "check_interval": 200,
-    "burn_in": 10000,
-    "seed": 42
-  }'
+```cmd
+curl -X "POST" ^
+  "http://localhost:8000/mcmc/amh" ^
+  -H "accept: application/json" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"expression\": \"(1/3) * exp(-((x - 2)/3) - exp(-((x - 2)/3)))\", \"iterations\": 50000, \"initial_variance\": 1.0, \"check_interval\": 200, \"burn_in\": 10000, \"seed\": 42}"
 ```
 
 ## Web Application (Streamlit)
@@ -266,7 +277,7 @@ The MCMC microservice provides an interactive web interface built with Streamlit
 
 ### Running the Web Application
 
-```bash
+```cmd
 # Start the Streamlit app
 streamlit run web_app.py
 ```
@@ -405,7 +416,7 @@ mcmc-microservice/
    - Configuration files
    - CSV exports
 
-## Things To Do
+## Further Work
 
 1. Add more MCMC methods.
 2. Allow for 2-D target distributions.
@@ -415,13 +426,5 @@ mcmc-microservice/
 6. Add a test_invalid_expression test. This is very important.
 7. In the web application, allow the user to see the live updating progress bar.
 8. Create tests for the web application.
-
-## Done 
-
-1. Allow the target distribution to be defined by the user. :heavy_check_mark:
-2. Turn into a CLI tool. :heavy_check_mark:
-3. Add burn-in capabilities. :heavy_check_mark:
-4. Add thinning capabilities. :heavy_check_mark:
-
 
 
